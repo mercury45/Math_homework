@@ -11,10 +11,15 @@ public class Main {
 		matrix.printMatrix();
 		System.out.println("-----");
 		anotherMatrix.printMatrix();
-		Matrix newarr = matrix.multiply(anotherMatrix);
-		System.out.println("It's multiplied:");
-		newarr.printMatrix();
+		int f = 0;
+		Matrix newArr = new Matrix();
+		try {
+			newArr = matrix.multiply(anotherMatrix);
+		} catch (Exception e) {
+			System.out.println("NULL, couldn't multiply");
 
-		
+			f = 1;
+		}
+		newArr.printMatrix();
 	}
 }

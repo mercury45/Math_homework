@@ -8,9 +8,12 @@ public class Matrix {
 
 	Scanner sc = new Scanner(System.in);
 	public void inputMatrix() {
-		System.out.print("Input matrix's sizes (m n): ");
-		rowsCount = sc.nextInt();
-		colsCount = sc.nextInt();
+		do {
+			System.out.print("Input matrix's sizes (m * n): ");
+			rowsCount = sc.nextInt();
+			colsCount = sc.nextInt();
+		} while (rowsCount == 0 || colsCount == 0);
+
 		this.array = new int[rowsCount][colsCount];
 
 		int method = methodAsk();
@@ -19,7 +22,7 @@ public class Matrix {
 		} else if (method == 2) {
 			secondMethod();
 		} else {
-			System.out.println("Wrong input");
+			System.out.println("Wrong input");	
 		}
 
 	}
@@ -59,7 +62,6 @@ public class Matrix {
 			multipliedMatrix.rowsCount = this.rowsCount;
 			multipliedMatrix.colsCount = newArray.colsCount;
 			multipliedMatrix.array = new int[this.rowsCount][newArray.colsCount];
-			System.out.println(this.rowsCount + " " + newArray.colsCount);
 			for (int i = 0; i < this.rowsCount; i++) {
 				for (int j = 0; j < newArray.colsCount; j++) {
 					for (int k = 0; k < this.colsCount; k++) {
@@ -84,7 +86,7 @@ public class Matrix {
 				if ( (r.equals("y") || (r.equals("yes") || (r.equals("да")) || (r.equals("д"))))) {
 					
 					multipliedMatrix = newArray.multiply(this);
-				}
+				} 
 				
 			}
 		} 
@@ -93,9 +95,12 @@ public class Matrix {
 	}
 
 	public void printMatrix() {
-
-		System.out.println("Matrix (" + rowsCount + " * " + colsCount + "):");
-		System.out.print(toString());
+		if (rowsCount != 0 && colsCount != 0) {
+			System.out.println("Matrix (" + rowsCount + " * " + colsCount + "):");
+			System.out.print(toString());
+		} else {
+			System.out.println("Matrix is null");
+		}
 	}
 
 	public String toString () {
