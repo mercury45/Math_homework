@@ -2,7 +2,6 @@ import java.util.Scanner;
 import java.util.Locale;
 import java.util.Arrays;
 public class Matrix {
-
 	double[][] array;
 	int rowsCount;
 	int colsCount;
@@ -85,13 +84,12 @@ public class Matrix {
 				System.out.println("You can multiply in other order do you want to do it?");
 				String r = sc.next().toLowerCase();
 				if ( (r.equals("y") || (r.equals("yes") || (r.equals("да")) || (r.equals("д"))))) {
-					
 					multipliedMatrix = newArray.multiply(this);
 				} 
 				
 			}
 		} 
-		return multipliedMatrix;
+		return null;
 		
 	}
 
@@ -107,8 +105,10 @@ public class Matrix {
 					this.array[i][j] += matrix.array[i][j];
 				}
 			}
+			return this;
+		} else {
+			return null;
 		}
-		return this;
 	}
 
 
@@ -120,6 +120,20 @@ public class Matrix {
 			System.out.println("Matrix is null");
 		}
 	}
+
+	public String toString (double[][] array) {
+		String line = "";
+		for (int i = 0; i < array.length; i++) {
+			line += array[i][0];
+			for (int j = 1; j < array[0].length; j++) {
+				line += " " + array[i][j];
+			}
+			line += "\n";
+		}
+		return line;
+	}
+
+
 
 	public String toString () {
 		String line = "";
@@ -134,19 +148,22 @@ public class Matrix {
 	}
 
 	public Matrix solve(Matrix vector) {
-		System.out.println("doing");
-		double[][] array = new double[this.rowsCount][this.colsCount+1];
-		for (int i = 0; i < this.colsCount; i++) {
-			array[i] = Arrays.copyOf(this.array[i],this.colsCount);
-			array[i][colsCount] = vector.array[i][colsCount-1];
+
+		double[][] array = new double[this.rowsCount][this.colsCount+1];	
+		for (int i = 0; i < this.rowsCount; i++) {
+			for (int j = 0; j < this.colsCount; j++) {
+				array[i][j] = this.array[i][j];
+			}
+			array[i][this.colsCount] = vector.array[i][0];
 		}
 
-		// 1 2 3   k = (-1) * a[i][j] * a[i][i];
-		// 3 4 5
-		// 5 5 5
+		// 1 2 3 0   k = (-1) * a[i][j] * a[i][i];
+		// 3 4 5 0
+		// 5 5 5 0
 		double div;
+		System.out.println(array.length);
 		for (int i = 0; i < array.length-1; i++) {
-			for (int j = i+1; j < array[0].length; j++) {
+			for (int j = i+1; j < array.length; j++) {
 				System.out.println("++");
 				div = (-1) * array[j][i] / array[i][i];
 				array[j][i] = 0;
@@ -165,7 +182,9 @@ public class Matrix {
 			System.out.println();
 
 		}
-
+		System.out.println(toString(array));
 		return vector;
 	}
+
+
 }
