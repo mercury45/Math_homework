@@ -5,7 +5,6 @@ public class Matrix {
 	double[][] array;
 	int rowsCount;
 	int colsCount;
-
 	Scanner sc = new Scanner(System.in);
 	public void inputMatrix() {
 		do {
@@ -85,11 +84,16 @@ public class Matrix {
 				String r = sc.next().toLowerCase();
 				if ( (r.equals("y") || (r.equals("yes") || (r.equals("да")) || (r.equals("д"))))) {
 					multipliedMatrix = newArray.multiply(this);
-				} 
+					return multipliedMatrix;
+				} else {
+					return null;
+				}
 				
+			} else {
+				return null;
 			}
-		} 
-		return null;
+
+		}
 		
 	}
 
@@ -100,12 +104,16 @@ public class Matrix {
 		int n2 = matrix.colsCount;
 
 		if (m1 == m2 && n1 == n2) {
+			Matrix mx = new Matrix();
+			mx.rowsCount = m1;
+			mx.colsCount = n1;
+			mx.array = new double[m1][n1];
 			for (int i = 0; i < m1; i++) {
 				for (int j = 0; j < n1; j++) {
-					this.array[i][j] += matrix.array[i][j];
+					mx.array[i][j] += this.array[i][j] + matrix.array[i][j];
 				}
 			}
-			return this;
+			return mx;
 		} else {
 			return null;
 		}
@@ -113,10 +121,11 @@ public class Matrix {
 
 
 	public void printMatrix() {
-		if (rowsCount != 0 && colsCount != 0) {
+		if (this.rowsCount != 0 && this.colsCount != 0) {
 			System.out.println("You have matrix (" + rowsCount + " * " + colsCount + "):");
 			System.out.print(toString());
 		} else {
+			System.out.println(rowsCount + " " + colsCount);
 			System.out.println("Matrix is null");
 		}
 	}
@@ -147,6 +156,19 @@ public class Matrix {
 		return line;
 	}
 
+
+
+	public Matrix inputVector(int m) {
+		Matrix vector = new Matrix();
+		vector.array = new double[1][m];
+		vector.rowsCount = 1;
+		vector.colsCount = m;
+		for (int i = 0; i < m; i++) {
+			vector.array[0][i] = sc.nextDouble();
+		}
+		return vector;
+	}
+
 	public Matrix solve(Matrix vector) {
 
 		double[][] array = new double[this.rowsCount][this.colsCount+1];	
@@ -154,36 +176,61 @@ public class Matrix {
 			for (int j = 0; j < this.colsCount; j++) {
 				array[i][j] = this.array[i][j];
 			}
-			array[i][this.colsCount] = vector.array[i][0];
+			array[i][this.colsCount] = vector.array[0][i];
 		}
 
-		// 1 2 3 0   k = (-1) * a[i][j] * a[i][i];
+		// 1 2 3 0   k = (-1) * a[i][j] / a[i][i];
 		// 3 4 5 0
 		// 5 5 5 0
+		array = Matrix.forwardGauss(array);
+		array = Matrix.backGauss(array);
+		vector.array = Matrix.solutionDiagonal(array);
+		System.out.println(toString(array));
+		System.out.println("----------\n" + toString(vector.array));
+		return vector;
+	}
+
+	private static double[][] forwardGauss(double[][] array) {
 		double div;
-		System.out.println(array.length);
 		for (int i = 0; i < array.length-1; i++) {
 			for (int j = i+1; j < array.length; j++) {
-				System.out.println("++");
 				div = (-1) * array[j][i] / array[i][i];
 				array[j][i] = 0;
-				for (int k = 0; k < array.length; k++) {
+				for (int k = 0; k < array.length+1; k++) {
 					if (i==k) continue;
 					array[j][k] += div*array[i][k];
-
 				}
-			}
-		}
-		
-		for (int i =0;i<array.length;i++){
-			for(int j=0;j<array[0].length;j++){
-				System.out.println(array[i][j] + " ");
-			}
-			System.out.println();
 
+			}
 		}
-		System.out.println(toString(array));
-		return vector;
+		return array;
+	}
+
+	private static double[][] backGauss(double [][] array) {
+		double div;
+		for (int i = array.length-1; i > 0; i--) {
+			for (int j = i-1; j >= 0; j--) {
+				div = (-1) * array[j][i] / array[i][i];
+				array[j][i] = 0;
+				for (int k = array[0].length-1; k >= 0; k--) {
+					if (i==k) continue;
+					array[j][k] += div*array[i][k];
+				}
+
+			}
+			System.out.println(i + " ----- ");
+		}
+
+		return array;
+	}
+
+	private static double[][] solutionDiagonal(double[][] array) {
+		double[][] vector = new double[1][array.length];
+		for (int i = 0; i < array.length; i++) {
+			vector[0][i] = array[i][array[0].length-1] / array[i][i];
+			System.out.println(vector[0][i]);
+		}
+		return vector;	
 	}
 
 
