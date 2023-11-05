@@ -60,6 +60,7 @@ public class Main {
 						} catch (Exception e) {
 							System.out.println(e);
 						}
+						break;
 					case "7":
 						System.exit(0);
 					default:
