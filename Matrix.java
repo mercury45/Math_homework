@@ -182,17 +182,55 @@ public class Matrix {
 		// 1 2 3 0   k = (-1) * a[i][j] / a[i][i];
 		// 3 4 5 0
 		// 5 5 5 0
-		array = Matrix.forwardGauss(array);
-		array = Matrix.backGauss(array);
-		vector.array = Matrix.solutionDiagonal(array);
-		System.out.println(toString(array));
-		System.out.println("----------\n" + toString(vector.array));
-		return vector;
+		boolean can = true;
+		try {
+			array = Matrix.forwardGauss(array);
+			System.out.println(toString(array));
+		} catch (LinealDependenceException e) {
+			can = false;
+		}
+		if (can) {
+			array = Matrix.backGauss(array);
+			vector.array = Matrix.solutionDiagonal(array);
+			System.out.println("----------\n" + toString(array));
+			return vector;
+		} else {
+			System.out.println("Система имеет беск.решений или не имеет их вовсе");
+			return null;
+		}
+		
 	}
 
-	private static double[][] forwardGauss(double[][] array) {
+	private static double[][] forwardGauss(double[][] array) throws LinealDependenceException {
 		double div;
 		for (int i = 0; i < array.length-1; i++) {
+			// Замена строк если на главной диагонали нуль
+			if (array[i][i] == 0) {
+				boolean f = false;
+				double replace;
+				for (int z = i+1; z < array.length && f == false; z++) {
+					if (array[i][z] != 0) {
+						f = true;
+						for (int l = 0; l < array[0].length; l++) {
+							replace = array[i][l];
+							array[i][l] = array[z][l];
+							array[z][l] = replace;
+						}
+					}
+
+				}
+				// Если после замен, на главной диагонали остался нуль, то это линейно зависимые и их обнуляем.
+				if (array[i][i] == 0) {
+					for (int h = 0; h < array.length-i; h++) {
+						for (int k = 0; k < array[0].length;k++) {
+							array[array.length-h-1][k] = 0;
+						}
+					}
+					continue;
+				}
+			}
+
+			// Делаем прямой ход Гаусса.
 			for (int j = i+1; j < array.length; j++) {
 				div = (-1) * array[j][i] / array[i][i];
 				array[j][i] = 0;
@@ -203,12 +241,18 @@ public class Matrix {
 
 			}
 		}
+		// Если на главной диагонали остался нуль в конце, значит линейно зависимые есть и отправляем ошибку.
+		if (array[array.length-1][array[0].length-2] == 0) {
+			throw new LinealDependenceException();
+		}
 		return array;
 	}
 
 	private static double[][] backGauss(double [][] array) {
 		double div;
 		for (int i = array.length-1; i > 0; i--) {
+
+
 			for (int j = i-1; j >= 0; j--) {
 				div = (-1) * array[j][i] / array[i][i];
 				array[j][i] = 0;
@@ -218,7 +262,6 @@ public class Matrix {
 				}
 
 			}
-			System.out.println(i + " ----- ");
 		}
 
 		return array;
@@ -227,11 +270,12 @@ public class Matrix {
 	private static double[][] solutionDiagonal(double[][] array) {
 		double[][] vector = new double[1][array.length];
 		for (int i = 0; i < array.length; i++) {
-			vector[0][i] = array[i][array[0].length-1] / array[i][i];
-			System.out.println(vector[0][i]);
+			vector[0][i] = Math.round(array[i][array[0].length-1] / array[i][i]);
 		}
 		return vector;	
 	}
 
 
 }
+
+
