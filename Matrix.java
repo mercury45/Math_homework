@@ -169,30 +169,48 @@ public class Matrix {
 		return vector;
 	}
 
+	// Ранг матрицы
+	public int findRang(Matrix matrix) {
+		int rang = 0;
+
+		double[][] arr = forwardGaussVector(matrix.array);
+		
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i][i] != 0) {
+				rang += 1;
+			} else {
+				return rang;
+			}
+		}
+		return rang;
+
+	}
+
+
+
+
+
 	public Matrix solve(Matrix vector) {
 
-		double[][] array = new double[this.rowsCount][this.colsCount+1];	
+		double[][] arr = new double[this.rowsCount][this.colsCount+1];	
 		for (int i = 0; i < this.rowsCount; i++) {
 			for (int j = 0; j < this.colsCount; j++) {
-				array[i][j] = this.array[i][j];
+				arr[i][j] = this.array[i][j];
 			}
-			array[i][this.colsCount] = vector.array[0][i];
+			arr[i][this.colsCount] = vector.array[0][i];
 		}
 
-		// 1 2 3 0   k = (-1) * a[i][j] / a[i][i];
-		// 3 4 5 0
-		// 5 5 5 0
 		boolean can = true;
 		try {
-			array = Matrix.forwardGauss(array);
-			System.out.println(toString(array));
+			arr = Matrix.forwardGauss(arr);
+			System.out.println(toString(arr));
 		} catch (LinealDependenceException e) {
 			can = false;
 		}
 		if (can) {
-			array = Matrix.backGauss(array);
-			vector.array = Matrix.solutionDiagonal(array);
-			System.out.println("----------\n" + toString(array));
+			arr = Matrix.backGauss(arr);
+			vector.array = Matrix.solutionDiagonal(arr);
+			System.out.println("----------\n" + toString(arr));
 			return vector;
 		} else {
 			System.out.println("Система имеет беск.решений или не имеет их вовсе");
@@ -200,6 +218,52 @@ public class Matrix {
 		}
 		
 	}
+
+	private static double[][] forwardGaussVector(double[][] array) {
+		double div;
+		for (int i = 0; i < array.length-1; i++) {
+			// Замена строк если на главной диагонали нуль
+			if (array[i][i] == 0) {
+				boolean f = false;
+				double replace;
+				for (int z = i+1; z < array.length && f == false; z++) {
+					if (array[i][z] != 0) {
+						f = true;
+						for (int l = 0; l < array[0].length; l++) {
+							replace = array[i][l];
+							array[i][l] = array[z][l];
+							array[z][l] = replace;
+						}
+					}
+
+				}
+				// Если после замен, на главной диагонали остался нуль, то это линейно зависимые и их обнуляем.
+				if (array[i][i] == 0) {
+					for (int h = 0; h < array.length-i; h++) {
+						for (int k = 0; k < array[0].length;k++) {
+							array[array.length-h-1][k] = 0;
+						}
+					}
+					continue;
+				}
+			}
+
+			// Делаем прямой ход Гаусса.
+			for (int j = i+1; j < array.length; j++) {
+				div = (-1) * array[j][i] / array[i][i];
+				array[j][i] = 0;
+				for (int k = 0; k < array.length; k++) {
+					if (i==k) continue;
+					array[j][k] += div*array[i][k];
+				}
+
+			}
+		}
+		return array;
+	}
+
+
+
 
 	private static double[][] forwardGauss(double[][] array) throws LinealDependenceException {
 		double div;

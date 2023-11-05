@@ -33,7 +33,6 @@ public class Main {
 						try {
 							matrixMultiply = matrix.multiply(matrixMultiply);
 						} catch (Exception e) {
-							System.out.println(e);
 							System.out.println(e.getMessage());
 						}
 						f = false;
@@ -47,6 +46,12 @@ public class Main {
 						f = false;
 						break;
 					case "5":
+						int rang = matrix.findRang(matrix);
+						if (rang != 0) {
+							System.out.println("rang of matrix = " + rang);
+						} else {
+							System.out.println("rang = 0 ?!");
+						}
 						f = false;
 						break;
 					case "6":
@@ -55,6 +60,7 @@ public class Main {
 						System.out.println("Give me a vector by size (1*" + m + " or "+ m + "*1):");
 						Matrix vector = new Matrix();
 						vector = vector.inputVector(m);
+
 						try {
 							matrix.solve(vector);
 						} catch (Exception e) {
@@ -63,6 +69,8 @@ public class Main {
 						break;
 					case "7":
 						System.exit(0);
+						f = false;
+						break;
 					default:
 						System.out.println("Bad command. Try again");
 						break;
