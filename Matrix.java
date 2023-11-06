@@ -173,8 +173,14 @@ public class Matrix {
 	public int findRang(Matrix matrix) {
 		int rang = 0;
 
-		double[][] arr = forwardGaussVector(matrix.array);
-		
+		double[][] arr = new double[this.rowsCount][this.colsCount];
+		for (int i = 0; i < this.rowsCount; i++) {
+			for (int j = 0; j < this.colsCount; j++) {
+				arr[i][j] = this.array[i][j];
+			}
+		}
+
+		arr = matrix.forwardGaussVector(arr);
 		for (int i = 0; i < arr.length; i++) {
 			if (arr[i][i] != 0) {
 				rang += 1;
@@ -203,14 +209,13 @@ public class Matrix {
 		boolean can = true;
 		try {
 			arr = Matrix.forwardGauss(arr);
-			System.out.println(toString(arr));
 		} catch (LinealDependenceException e) {
 			can = false;
 		}
 		if (can) {
 			arr = Matrix.backGauss(arr);
 			vector.array = Matrix.solutionDiagonal(arr);
-			System.out.println("----------\n" + toString(arr));
+			System.out.println("----------\n" + toString(vector.array));
 			return vector;
 		} else {
 			System.out.println("Система имеет беск.решений или не имеет их вовсе");
@@ -315,8 +320,6 @@ public class Matrix {
 	private static double[][] backGauss(double [][] array) {
 		double div;
 		for (int i = array.length-1; i > 0; i--) {
-
-
 			for (int j = i-1; j >= 0; j--) {
 				div = (-1) * array[j][i] / array[i][i];
 				array[j][i] = 0;
