@@ -33,24 +33,24 @@ public class Matrix {
 	}
 
 	public void firstMethod() {
-		System.out.println("Now put your matrix's strings one by one.");
+		System.out.println("Now put strings one by one. FOR FLOAT NUMBERS USE ','. Example: (2,5 ; 6,23)");
 		Scanner sc = new Scanner(System.in);
 		for (int i = 0; i < rowsCount; i++) {
 			System.out.println("Put your " + (i + 1) + " string");
 			for (int j = 0; j < colsCount; j++) {
-				array[i][j] = sc.nextInt();
+				array[i][j] = sc.nextDouble();
 			}
 		}
 
 	}
 
 	public void secondMethod() {
-		System.out.println("Now you should put your elements one by one.");
+		System.out.println("Now put your elements one by one. FOR FLOAT NUMBERS USE ','. Example: (2,5 ; 6,23)");
 		Scanner sc = new Scanner(System.in);
 		for (int i = 0; i < rowsCount; i++) {
 			for (int j = 0; j < colsCount; j++) {
 				System.out.println("Put your (" + (i+1) + ", " + (j+1) + ") element");
-				array[i][j] = sc.nextInt();
+				array[i][j] = sc.nextDouble();
 			}
 		}
 	}
@@ -180,8 +180,8 @@ public class Matrix {
 			}
 		}
 
-		arr = matrix.forwardGaussVector(arr);
-		for (int i = 0; i < arr.length; i++) {
+		arr = matrix.forwardGaussWithoutVector(arr);
+		for (int i = 0; i < arr[0].length; i++) {
 			if (arr[i][i] != 0) {
 				rang += 1;
 			} else {
@@ -206,27 +206,24 @@ public class Matrix {
 			arr[i][this.colsCount] = vector.array[0][i];
 		}
 
-		boolean can = true;
+
 		try {
 			arr = Matrix.forwardGauss(arr);
-		} catch (LinealDependenceException e) {
-			can = false;
+		} catch (Exception e) {
+			System.out.println("ERROR:" + e.getMessage());
 		}
-		if (can) {
-			arr = Matrix.backGauss(arr);
-			vector.array = Matrix.solutionDiagonal(arr);
-			System.out.println("----------\n" + toString(vector.array));
-			return vector;
-		} else {
-			System.out.println("Система имеет беск.решений или не имеет их вовсе");
-			return null;
-		}
+		arr = Matrix.backGauss(arr);
+		vector.array = Matrix.solutionDiagonal(arr);
+		System.out.println("----------\n" + toString(vector.array));
+		return vector;
+
+
 		
 	}
 
-	private static double[][] forwardGaussVector(double[][] array) {
+	private static double[][] forwardGaussWithoutVector(double[][] array) {
 		double div;
-		for (int i = 0; i < array.length-1; i++) {
+		for (int i = 0; i < array[0].length-1; i++) {
 			// Замена строк если на главной диагонали нуль
 			if (array[i][i] == 0) {
 				boolean f = false;
@@ -242,13 +239,8 @@ public class Matrix {
 					}
 
 				}
-				// Если после замен, на главной диагонали остался нуль, то это линейно зависимые и их обнуляем.
+				// Если после замен, на главной диагонали остался нуль, то значит, что есть ЛЗ строки
 				if (array[i][i] == 0) {
-					for (int h = 0; h < array.length-i; h++) {
-						for (int k = 0; k < array[0].length;k++) {
-							array[array.length-h-1][k] = 0;
-						}
-					}
 					continue;
 				}
 			}
@@ -257,7 +249,7 @@ public class Matrix {
 			for (int j = i+1; j < array.length; j++) {
 				div = (-1) * array[j][i] / array[i][i];
 				array[j][i] = 0;
-				for (int k = 0; k < array.length; k++) {
+				for (int k = 0; k < array[0].length; k++) {
 					if (i==k) continue;
 					array[j][k] += div*array[i][k];
 				}
@@ -270,7 +262,7 @@ public class Matrix {
 
 
 
-	private static double[][] forwardGauss(double[][] array) throws LinealDependenceException {
+	private static double[][] forwardGauss(double[][] array) {
 		double div;
 		for (int i = 0; i < array.length-1; i++) {
 			// Замена строк если на главной диагонали нуль
@@ -288,13 +280,8 @@ public class Matrix {
 					}
 
 				}
-				// Если после замен, на главной диагонали остался нуль, то это линейно зависимые и их обнуляем.
+				// Если после замен, на главной диагонали остался нуль, то значит, что есть ЛЗ строки
 				if (array[i][i] == 0) {
-					for (int h = 0; h < array.length-i; h++) {
-						for (int k = 0; k < array[0].length;k++) {
-							array[array.length-h-1][k] = 0;
-						}
-					}
 					continue;
 				}
 			}
@@ -303,16 +290,12 @@ public class Matrix {
 			for (int j = i+1; j < array.length; j++) {
 				div = (-1) * array[j][i] / array[i][i];
 				array[j][i] = 0;
-				for (int k = 0; k < array.length+1; k++) {
+				for (int k = 0; k < array[0].length; k++) {
 					if (i==k) continue;
 					array[j][k] += div*array[i][k];
 				}
 
 			}
-		}
-		// Если на главной диагонали остался нуль в конце, значит линейно зависимые есть и отправляем ошибку.
-		if (array[array.length-1][array[0].length-2] == 0) {
-			throw new LinealDependenceException();
 		}
 		return array;
 	}
