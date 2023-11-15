@@ -5,6 +5,13 @@ public class Matrix {
 	double[][] array;
 	int rowsCount;
 	int colsCount;
+	Matrix() {
+	}
+	Matrix(int rowsCount, int colsCount, double[][] array) {
+		this.rowsCount = rowsCount;
+		this.colsCount = colsCount;
+		this.array = array;
+	}
 	Scanner sc = new Scanner(System.in);
 	public void inputMatrix() {
 		do {
@@ -102,21 +109,17 @@ public class Matrix {
 		int n1 = this.colsCount;
 		int m2 = matrix.rowsCount; 
 		int n2 = matrix.colsCount;
-
-		if (m1 == m2 && n1 == n2) {
-			Matrix mx = new Matrix();
-			mx.rowsCount = m1;
-			mx.colsCount = n1;
-			mx.array = new double[m1][n1];
-			for (int i = 0; i < m1; i++) {
-				for (int j = 0; j < n1; j++) {
-					mx.array[i][j] += this.array[i][j] + matrix.array[i][j];
-				}
+		Matrix mx = new Matrix();
+		mx.rowsCount = m1;
+		mx.colsCount = n1;
+		mx.array = new double[m1][n1];
+		for (int i = 0; i < m1; i++) {
+			for (int j = 0; j < n1; j++) {
+				mx.array[i][j] += this.array[i][j] + matrix.array[i][j];
 			}
-			return mx;
-		} else {
-			return null;
 		}
+		return mx;
+
 	}
 
 
@@ -170,25 +173,30 @@ public class Matrix {
 	}
 
 	// Ранг матрицы
-	public int findRang(Matrix matrix) {
-		int rang = 0;
+	public static int findRang(Matrix matrix) {
+		int rang;
 
-		double[][] arr = new double[this.rowsCount][this.colsCount];
-		for (int i = 0; i < this.rowsCount; i++) {
-			for (int j = 0; j < this.colsCount; j++) {
-				arr[i][j] = this.array[i][j];
+		double[][] arr = new double[matrix.rowsCount][matrix.colsCount];
+		for (int i = 0; i < matrix.rowsCount; i++) {
+			for (int j = 0; j < matrix.colsCount; j++) {
+				arr[i][j] = matrix.array[i][j];
 			}
 		}
-
-		arr = matrix.forwardGaussWithoutVector(arr);
-		for (int i = 0; i < arr[0].length; i++) {
-			if (arr[i][i] != 0) {
-				rang += 1;
-			} else {
-				return rang;
+		rang = matrix.rowsCount < matrix.colsCount ? matrix.rowsCount : matrix.colsCount; // Находим максимальный ранг
+		arr = matrix.forwardGaussWithoutVector(arr); // прямой ход не расширенной матрицы
+		int depended = 0;
+		for (int i = 0; i < arr.length; i++) {
+			int count = 0;
+			for (int j = 0; j < arr[0].length; j++) {
+				if (arr[i][j] == 0) {
+					count++;
+				}
+			}
+			if (count == arr[0].length) {
+				depended++;
 			}
 		}
-		return rang;
+		return (rang-depended);
 
 	}
 
@@ -205,16 +213,22 @@ public class Matrix {
 			}
 			arr[i][this.colsCount] = vector.array[0][i];
 		}
-
+		Matrix m = new Matrix(this.rowsCount, this.colsCount, arr);
 
 		try {
 			arr = Matrix.forwardGauss(arr);
 		} catch (Exception e) {
 			System.out.println("ERROR:" + e.getMessage());
 		}
-		arr = Matrix.backGauss(arr);
-		vector.array = Matrix.solutionDiagonal(arr);
-		System.out.println("----------\n" + toString(vector.array));
+		if (findRang(this) == findRang(m) && findRang(this) == colsCount) {
+			arr = Matrix.backGauss(arr);
+			vector.array = Matrix.solutionDiagonal(arr);
+			System.out.println("----------\n" + toString(vector.array));
+		} else if (findRang(this) == findRang(m) && findRang(this) < colsCount) {
+			System.out.println("There is infinity number of solutions");
+		} else if (findRang(this) != findRang(m)) {
+			System.out.println("There is no solutions");
+		}
 		return vector;
 
 
@@ -320,7 +334,7 @@ public class Matrix {
 	private static double[][] solutionDiagonal(double[][] array) {
 		double[][] vector = new double[1][array.length];
 		for (int i = 0; i < array.length; i++) {
-			vector[0][i] = Math.round(array[i][array[0].length-1] / array[i][i]);
+			vector[0][i] = Math.round(array[i][array[0].length-1] / array[i][i] * 100) / 100;
 		}
 		return vector;	
 	}

@@ -2,11 +2,7 @@ import java.util.Scanner;
 
 public class Main {
 	public static void clean() {
-		try {
-			new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-		} catch (Exception e) {
-			System.out.println("");
-		}
+		System.out.print("\033[H\033[2J");
 	}
 
 	public static void main(String [] args) {
@@ -20,14 +16,17 @@ public class Main {
 				chose = sc.next();
 				switch (chose) {
 					case "1":
+						clean();
 						matrix.inputMatrix();
 						f = false;
 						break;
 					case "2":
+						clean();
 						matrix.printMatrix();
 						f = false;
 						break;
 					case "3":
+						clean();
 						Matrix matrixMultiply = new Matrix();
 						matrixMultiply.inputMatrix();	
 						try {
@@ -38,15 +37,21 @@ public class Main {
 						f = false;
 						break;
 					case "4":
+						clean();
 						Matrix matrixsum = new Matrix();
 						matrixsum.inputMatrix();
-						matrixsum = matrix.plus(matrixsum);
-						System.out.println("Summarize of two matrix:");
-						matrixsum.printMatrix();
+						if (matrixsum.colsCount == matrix.colsCount && matrixsum.rowsCount == matrix.rowsCount){
+							matrixsum = matrix.plus(matrixsum);
+							System.out.println("Summarize of two matrix:");
+							matrixsum.printMatrix();
+						} else {
+							System.out.println("Sizes don't suit!");
+						}
 						f = false;
 						break;
 					case "5":
-						int rang = matrix.findRang(matrix);
+						clean();
+						int rang = Matrix.findRang(matrix);
 						if (rang != 0) {
 							System.out.println("rang of matrix = " + rang);
 						} else {
@@ -55,6 +60,7 @@ public class Main {
 						f = false;
 						break;
 					case "6":
+						clean();
 						f = false;
 						int m = matrix.rowsCount;
 						System.out.println("Give me a vector by size (1*" + m + " or "+ m + "*1):");
