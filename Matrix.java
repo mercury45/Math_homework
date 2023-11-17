@@ -300,7 +300,7 @@ public class Matrix {
 	private static double[][] solutionDiagonal(double[][] array) {
 		double[][] vector = new double[1][array.length];
 		for (int i = 0; i < array.length; i++) {
-			vector[0][i] = Math.round(array[i][array[0].length-1] / array[i][i] * 100) / 100;
+			vector[0][i] = Math.round(array[i][array[0].length-1] / array[i][i] * 1000) / 1000.0;
 		}
 		return vector;	
 	}
