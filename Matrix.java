@@ -6,12 +6,14 @@ public class Matrix {
 	int rowsCount;
 	int colsCount;
 	Matrix() {
+		this(0,0, new double[0][0]);
 	}
 	Matrix(int rowsCount, int colsCount, double[][] array) {
 		this.rowsCount = rowsCount;
 		this.colsCount = colsCount;
 		this.array = array;
 	}
+
 	Scanner sc = new Scanner(System.in);
 	public void inputMatrix() {
 		do {
@@ -126,9 +128,8 @@ public class Matrix {
 	public void printMatrix() {
 		if (this.rowsCount != 0 && this.colsCount != 0) {
 			System.out.println("You have matrix (" + rowsCount + " * " + colsCount + "):");
-			System.out.print(toString());
+			System.out.print(toString(array));
 		} else {
-			System.out.println(rowsCount + " " + colsCount);
 			System.out.println("Matrix is null");
 		}
 	}
@@ -183,7 +184,7 @@ public class Matrix {
 			}
 		}
 		rang = matrix.rowsCount < matrix.colsCount ? matrix.rowsCount : matrix.colsCount; // Находим максимальный ранг
-		arr = matrix.forwardGaussWithoutVector(arr); // прямой ход не расширенной матрицы
+		arr = matrix.forwardGauss(arr);
 		int depended = 0;
 		for (int i = 0; i < arr.length; i++) {
 			int count = 0;
@@ -213,7 +214,7 @@ public class Matrix {
 			}
 			arr[i][this.colsCount] = vector.array[0][i];
 		}
-		Matrix m = new Matrix(this.rowsCount, this.colsCount, arr);
+		Matrix m = new Matrix(this.rowsCount, this.colsCount+1, arr);
 
 		try {
 			arr = Matrix.forwardGauss(arr);
@@ -229,49 +230,14 @@ public class Matrix {
 		} else if (findRang(this) != findRang(m)) {
 			System.out.println("There is no solutions");
 		}
+
 		return vector;
 
 
 		
 	}
 
-	private static double[][] forwardGaussWithoutVector(double[][] array) {
-		double div;
-		for (int i = 0; i < array[0].length-1; i++) {
-			// Замена строк если на главной диагонали нуль
-			if (array[i][i] == 0) {
-				boolean f = false;
-				double replace;
-				for (int z = i+1; z < array.length && f == false; z++) {
-					if (array[i][z] != 0) {
-						f = true;
-						for (int l = 0; l < array[0].length; l++) {
-							replace = array[i][l];
-							array[i][l] = array[z][l];
-							array[z][l] = replace;
-						}
-					}
 
-				}
-				// Если после замен, на главной диагонали остался нуль, то значит, что есть ЛЗ строки
-				if (array[i][i] == 0) {
-					continue;
-				}
-			}
-
-			// Делаем прямой ход Гаусса.
-			for (int j = i+1; j < array.length; j++) {
-				div = (-1) * array[j][i] / array[i][i];
-				array[j][i] = 0;
-				for (int k = 0; k < array[0].length; k++) {
-					if (i==k) continue;
-					array[j][k] += div*array[i][k];
-				}
-
-			}
-		}
-		return array;
-	}
 
 
 
