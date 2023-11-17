@@ -224,7 +224,7 @@ public class Matrix {
 		if (findRang(this) == findRang(m) && findRang(this) == colsCount) {
 			arr = Matrix.backGauss(arr);
 			vector.array = Matrix.solutionDiagonal(arr);
-			System.out.println("----------\n" + toString(vector.array));
+			System.out.println("Solution:\n" + toString(vector.array));
 		} else if (findRang(this) == findRang(m) && findRang(this) < colsCount) {
 			System.out.println("There is infinity number of solutions");
 		} else if (findRang(this) != findRang(m)) {
