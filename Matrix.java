@@ -20,7 +20,7 @@ public class Matrix {
 			System.out.print("Input matrix's sizes (m * n): ");
 			rowsCount = sc.nextInt();
 			colsCount = sc.nextInt();
-		} while (rowsCount == 0 || colsCount == 0);
+		} while (rowsCount <= 0 || colsCount <= 0);
 
 		this.array = new double[rowsCount][colsCount];
 
@@ -126,7 +126,7 @@ public class Matrix {
 
 
 	public void printMatrix() {
-		if (this.rowsCount != 0 && this.colsCount != 0) {
+		if (this.rowsCount > 0 && this.colsCount > 0) {
 			System.out.println("You have matrix (" + rowsCount + " * " + colsCount + "):");
 			System.out.print(toString(array));
 		} else {
@@ -134,7 +134,7 @@ public class Matrix {
 		}
 	}
 
-	public String toString (double[][] array) {
+	public static String toString (double[][] array) {
 		String line = "";
 		for (int i = 0; i < array.length; i++) {
 			line += array[i][0];
@@ -186,10 +186,10 @@ public class Matrix {
 		rang = matrix.rowsCount < matrix.colsCount ? matrix.rowsCount : matrix.colsCount; // Находим максимальный ранг
 		arr = matrix.forwardGauss(arr);
 		int depended = 0;
-		for (int i = 0; i < arr.length; i++) {
+		for (int i = 0; i < rang; i++) {
 			int count = 0;
 			for (int j = 0; j < arr[0].length; j++) {
-				if (arr[i][j] == 0) {
+				if (arr[i][j] == 0 || Math.abs(arr[i][j]) < 1e-5) {
 					count++;
 				}
 			}
@@ -218,17 +218,17 @@ public class Matrix {
 
 		try {
 			arr = Matrix.forwardGauss(arr);
+			if (findRang(this) == findRang(m) && findRang(this) == colsCount) {
+				arr = Matrix.backGauss(arr);
+				vector.array = Matrix.solutionDiagonal(arr);
+				System.out.println("Solution:\n" + toString(vector.array));
+			} else if (findRang(this) == findRang(m) && findRang(this) < colsCount) {
+				System.out.println("There is infinity number of solutions");
+			} else if (findRang(this) != findRang(m)) {
+				System.out.println("There is no solutions");
+			}
 		} catch (Exception e) {
 			System.out.println("ERROR:" + e.getMessage());
-		}
-		if (findRang(this) == findRang(m) && findRang(this) == colsCount) {
-			arr = Matrix.backGauss(arr);
-			vector.array = Matrix.solutionDiagonal(arr);
-			System.out.println("Solution:\n" + toString(vector.array));
-		} else if (findRang(this) == findRang(m) && findRang(this) < colsCount) {
-			System.out.println("There is infinity number of solutions");
-		} else if (findRang(this) != findRang(m)) {
-			System.out.println("There is no solutions");
 		}
 
 		return vector;
@@ -244,13 +244,14 @@ public class Matrix {
 
 	private static double[][] forwardGauss(double[][] array) {
 		double div;
+		int j2 = 0;
 		for (int i = 0; i < array.length-1; i++) {
 			// Замена строк если на главной диагонали нуль
-			if (array[i][i] == 0) {
+			if (array[i][i+j2] == 0) {
 				boolean f = false;
 				double replace;
 				for (int z = i+1; z < array.length && f == false; z++) {
-					if (array[i][z] != 0) {
+					if (array[z][i+j2] != 0) {
 						f = true;
 						for (int l = 0; l < array[0].length; l++) {
 							replace = array[i][l];
@@ -260,21 +261,20 @@ public class Matrix {
 					}
 
 				}
-				// Если после замен, на главной диагонали остался нуль, то значит, что есть ЛЗ строки
-				if (array[i][i] == 0) {
+				// Если после замен, на главной диагонали остался нуль
+				if (array[i][i+j2] == 0) {
+					i--;
+					j2++;
 					continue;
 				}
 			}
 
 			// Делаем прямой ход Гаусса.
 			for (int j = i+1; j < array.length; j++) {
-				div = (-1) * array[j][i] / array[i][i];
-				array[j][i] = 0;
-				for (int k = 0; k < array[0].length; k++) {
-					if (i==k) continue;
+				div = (-1) * array[j][i+j2] / array[i][i+j2];
+				for (int k = i+j2; k < array[0].length; k++) {
 					array[j][k] += div*array[i][k];
 				}
-
 			}
 		}
 		return array;
