@@ -1,10 +1,11 @@
+import java.security.spec.RSAOtherPrimeInfo;
 import java.util.Scanner;
-import java.util.Locale;
-import java.util.Arrays;
+
 public class Matrix {
 	double[][] array;
 	int rowsCount;
 	int colsCount;
+
 	Matrix() {
 		this(0,0, new double[0][0]);
 	}
@@ -125,6 +126,7 @@ public class Matrix {
 	}
 
 
+	/*
 	public void printMatrix() {
 		if (this.rowsCount > 0 && this.colsCount > 0) {
 			System.out.println("You have matrix (" + rowsCount + " * " + colsCount + "):");
@@ -133,6 +135,7 @@ public class Matrix {
 			System.out.println("Matrix is null");
 		}
 	}
+	*/
 
 	public static String toString (double[][] array) {
 		String line = "";
@@ -149,7 +152,7 @@ public class Matrix {
 
 
 	public String toString () {
-		String line = "";
+		String line = "Matrix (" + rowsCount + " * " + colsCount + "):\n";
 		for (int i = 0; i < array.length; i++) {
 			line += array[i][0];
 			for (int j = 1; j < array[0].length; j++) {
@@ -305,6 +308,75 @@ public class Matrix {
 		return vector;	
 	}
 
+	private static double det(double[][] array) throws LinealDependenceException {
+		double[][] arr = copyArray(array);
+		arr = forwardGauss(arr);
+		double det = 1;
+		if (checkDependence(arr[arr.length-1])) {
+			throw new LinealDependenceException();
+		} else {
+			for (int i = 0; i < arr.length; i++) {
+				det *= arr[i][i];
+			}
+			return det;
+		}
+	}
+
+	private static double[][] changeColumns(double[][] array, double[][] vector, int place) {
+		double[][] arr = copyArray(array);
+		for (int i = 0; i < arr.length; i++) {
+			arr[i][place] = vector[0][i];
+		}
+		return arr;
+	}
+	private static boolean checkDependence(double[] array) {
+		int c = 0;
+		for (int i = 0; i < array.length; i++) {
+			if (array[i] == 0) {
+				c++;
+			}
+		}
+		return (c == array.length);
+	}
+
+	private static double[][] copyArray(double[][] array) {
+		int cols = array[0].length;
+		int rows = array.length;
+		double[][] arr = new double[rows][cols];
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				arr[i][j] = array[i][j];
+			}
+		}
+		return arr;
+	}
+
+	public String solveCramer(Matrix vector) throws LinealDependenceException {
+		double[] solutions = new double[rowsCount];
+		String line = "";
+		if (det(array) != 0) {
+			double det = det(array);
+			for (int i = 0; i < array.length; i++) {
+				double arr[][] = copyArray(changeColumns(array, vector.array, i));
+				try {
+					solutions[i] = det(arr) / det;
+				} catch (LinealDependenceException e) {
+					System.out.println("x" + (i + 1) + " = " + solutions[i]);
+				} finally {
+					if (i == array.length - 1) {
+						line += "x" + (i+1) + " = " + Math.round(solutions[i] * 10000) / 10000.0;
+					} else {
+						line += "x" + (i + 1) + " = " + Math.round(solutions[i] * 10000) / 10000.0 + ", ";
+					}
+				}
+			}
+		} else {
+			return "";
+		}
+
+		return line;
+
+	}
 
 }
 
