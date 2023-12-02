@@ -80,7 +80,7 @@ public class Main {
 					case "8":
 
 						m = matrix.rowsCount;
-						if (m > 0) {
+						if (m > 0 && matrix.rowsCount == matrix.colsCount) {
 							System.out.println("Give me a vector by size (1*" + m + " or " + m + "*1):");
 							Matrix vector1 = new Matrix();
 							vector1 = vector1.inputVector(m);
@@ -89,6 +89,8 @@ public class Main {
 							} catch (LinealDependenceException e) {
 								System.out.println("No solutions");
 							};
+						} else {
+							System.out.println("bad sizes of matrix!");
 						}
 						f = false;
 						break;
