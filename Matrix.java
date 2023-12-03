@@ -110,8 +110,6 @@ public class Matrix {
 	public Matrix plus(Matrix matrix) {
 		int m1 = this.rowsCount; 
 		int n1 = this.colsCount;
-		int m2 = matrix.rowsCount; 
-		int n2 = matrix.colsCount;
 		Matrix mx = new Matrix();
 		mx.rowsCount = m1;
 		mx.colsCount = n1;
@@ -219,19 +217,18 @@ public class Matrix {
 		}
 		Matrix m = new Matrix(this.rowsCount, this.colsCount+1, arr);
 
-		try {
-			arr = Matrix.forwardGauss(arr);
-			if (findRang(this) == findRang(m) && findRang(this) == colsCount) {
-				arr = Matrix.backGauss(arr);
-				vector.array = Matrix.solutionDiagonal(arr);
-				System.out.println("Solution:\n" + toString(vector.array));
-			} else if (findRang(this) == findRang(m) && findRang(this) < colsCount) {
-				System.out.println("There is infinity number of solutions");
-			} else if (findRang(this) != findRang(m)) {
-				System.out.println("There is no solutions");
-			}
-		} catch (Exception e) {
-			System.out.println("ERROR:" + e.getMessage());
+
+		arr = Matrix.forwardGauss(arr);
+		if (findRang(this) == findRang(m) && findRang(this) == colsCount) {
+			arr = Matrix.backGauss(arr);
+			vector.array = Matrix.solutionDiagonal(arr);
+			System.out.println("Solution:\n" + toString(vector.array));
+		} else if (findRang(this) == findRang(m) && findRang(this) < colsCount) {
+			System.out.println("There is infinity number of solutions");
+			return null;
+		} else if (findRang(this) != findRang(m)) {
+			System.out.println("There is no solutions");
+			return null;
 		}
 
 		return vector;
@@ -310,16 +307,50 @@ public class Matrix {
 
 	private static double det(double[][] array) throws LinealDependenceException {
 		double[][] arr = copyArray(array);
-		arr = forwardGauss(arr);
+		double div;
 		double det = 1;
-		if (checkDependence(arr[arr.length-1])) {
-			throw new LinealDependenceException();
-		} else {
-			for (int i = 0; i < arr.length; i++) {
-				det *= arr[i][i];
+		int sign = 1;
+		for (int i = 0; i < arr.length-1; i++) {
+			// Замена строк если на главной диагонали нуль
+			if (arr[i][i] == 0) {
+				boolean f = false;
+				double replace;
+				for (int z = i+1; z < arr.length && f == false; z++) {
+					if (arr[z][i] != 0) {
+						f = true;
+						for (int l = 0; l < arr[0].length; l++) {
+							replace = arr[i][l];
+							arr[i][l] = arr[z][l];
+							arr[z][l] = replace;
+							// При изменении строк меняем знак
+							sign *= -1;
+						}
+					}
+
+				}
+				// Если после замен, на главной диагонали остался нуль
+				if (arr[i][i] == 0) {
+					det = 0;
+					throw new LinealDependenceException();
+				}
 			}
-			return det;
+
+			// Делаем прямой ход Гаусса.
+			for (int j = i+1; j < arr.length; j++) {
+				div = (-1) * arr[j][i] / arr[i][i];
+				for (int k = i; k < arr[0].length; k++) {
+					arr[j][k] += Math.round(div*arr[i][k] * 10000) / 10000.0;
+				}
+			}
 		}
+
+		// Считаем det
+		for (int i = 0; i < arr.length; i++) {
+			det *= arr[i][i];
+		}
+
+		return sign * det;
+		// think about changing sign
 	}
 
 	private static double[][] changeColumns(double[][] array, double[][] vector, int place) {
@@ -328,15 +359,6 @@ public class Matrix {
 			arr[i][place] = vector[0][i];
 		}
 		return arr;
-	}
-	private static boolean checkDependence(double[] array) {
-		int c = 0;
-		for (int i = 0; i < array.length; i++) {
-			if (array[i] == 0) {
-				c++;
-			}
-		}
-		return (c == array.length);
 	}
 
 	private static double[][] copyArray(double[][] array) {
@@ -351,31 +373,19 @@ public class Matrix {
 		return arr;
 	}
 
-	public String solveCramer(Matrix vector) throws LinealDependenceException {
-		double[] solutions = new double[rowsCount];
-		String line = "";
+
+	public Matrix solveCramer(Matrix vector) throws LinealDependenceException {
+		Matrix solutions = new Matrix(1,colsCount, new double[1][colsCount]);
 		if (det(array) != 0) {
 			double det = det(array);
 			for (int i = 0; i < array.length; i++) {
 				double arr[][] = copyArray(changeColumns(array, vector.array, i));
-				try {
-					solutions[i] = det(arr) / det;
-				} catch (LinealDependenceException e) {
-					System.out.println("x" + (i + 1) + " = " + solutions[i]);
-				} finally {
-					if (i == array.length - 1) {
-						line += "x" + (i+1) + " = " + Math.round(solutions[i] * 10000) / 10000.0;
-					} else {
-						line += "x" + (i + 1) + " = " + Math.round(solutions[i] * 10000) / 10000.0 + ", ";
-					}
-				}
+				solutions.array[0][i] = Math.round((det(arr) / det) * 10000) / 10000.0;
 			}
+			return solutions;
 		} else {
-			return "";
+			throw new LinealDependenceException();
 		}
-
-		return line;
-
 	}
 
 }

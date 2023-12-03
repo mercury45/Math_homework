@@ -87,7 +87,7 @@ public class Main {
 							try {
 								System.out.println(matrix.solveCramer(vector1));
 							} catch (LinealDependenceException e) {
-								System.out.println("No solutions");
+								System.out.println("Determinant = 0, there is no solutions!");
 							};
 						} else {
 							System.out.println("bad sizes of matrix!");
